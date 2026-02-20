@@ -1,39 +1,75 @@
-document.addEventListener('DOMContentLoaded', () => {
+$(document).ready(function() {
 
-  document.getElementById('sendBtn').addEventListener('click', () => {
+  // =========================
+  // LISTA DE CONTACTOS
+  // =========================
+  const contactos = [
+    'Juan Pérez',
+    'María González',
+    'Carlos Soto',
+    'Ana Rojas'
+  ];
 
-    const receiver =
-      document.getElementById('receiver').value.trim();
+  function mostrarContactos(filtro = '') {
+    $('#listaContactos').empty();
 
-    const amount =
-      Number(document.getElementById('amount').value);
+    contactos
+      .filter(c => c.toLowerCase().includes(filtro.toLowerCase()))
+      .forEach(c => {
+        $('#listaContactos').append(
+          `<li class="list-group-item contacto-item">${c}</li>`
+        );
+      });
+  }
 
-    if (!receiver || amount <= 0) {
-      alert('Datos inválidos');
+  mostrarContactos();
+
+  $('#buscarContacto').on('keyup', function() {
+    mostrarContactos($(this).val());
+  });
+
+  $(document).on('click', '.contacto-item', function() {
+    $('#buscarContacto').val($(this).text());
+    $('#listaContactos').empty();
+  });
+
+
+  // =========================
+  // ENVÍO DE DINERO
+  // =========================
+  $('#sendBtn').on('click', function() {
+
+    const destinatario = $('#buscarContacto').val();
+    const monto = Number($('#amount').val());
+
+    if (!destinatario) {
+      alert('Seleccione un destinatario');
       return;
     }
 
-    // LEEMOS SALDO CORRECTO
-    const saldoActual =
-      Number(localStorage.getItem('saldo')) || 0;
-
-    if (amount > saldoActual) {
-      alert('Saldo insuficiente');
+    if (!monto || monto <= 0) {
+      alert('Ingrese un monto válido');
       return;
     }
 
-    const nuevoSaldo = saldoActual - amount;
+    const saldoActual = Number(localStorage.getItem('saldo')) || 0;
+
+    if (monto > saldoActual) {
+      alert('Fondos insuficientes');
+      return;
+    }
+
+    const nuevoSaldo = saldoActual - monto;
     localStorage.setItem('saldo', nuevoSaldo);
 
-    // LEEMOS TRANSACCIONES CORRECTAS
     const transacciones =
       JSON.parse(localStorage.getItem('transacciones')) || [];
 
     transacciones.push({
       tipo: 'Envío',
-      destino: receiver,
-      monto: amount,
-      fecha: new Date().toLocaleString()
+      monto: monto,
+      destinatario: destinatario,
+      fecha: new Date().toLocaleString('es-CL')
     });
 
     localStorage.setItem(
@@ -41,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       JSON.stringify(transacciones)
     );
 
+    alert('Transferencia realizada con éxito');
     window.location.href = 'menu.html';
   });
 
