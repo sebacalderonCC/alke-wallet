@@ -19,3 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     balanceEl.textContent = `$${saldo.toLocaleString('es-CL')}`;
   }
 });
+$(document).ready(function() {
+  $('.card').hide().fadeIn(800);
+});
